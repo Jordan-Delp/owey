@@ -4,6 +4,7 @@ import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import ReceiptUploader from "@/components/ReceiptUploader";
+import ProcessButton from "@/components/ProcessButton";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -56,20 +57,33 @@ export default async function GroupPage({ params }: Props) {
       <section className="mt-8">
         <h2 className="text-sm font-medium text-gray-500">Receipts</h2>
         {group.receipts.length === 0 ? (
-          <p className="mt-2 text-gray-500">
-            No receipts yet. Upload one to get started.
-          </p>
+            <p className="mt-2 text-gray-500">
+                No receipts yet. Upload one to get started.
+            </p>
         ) : (
-          <ul className="mt-2 space-y-3">
-            {group.receipts.map((r) => (
-              <li key={r.id} className="flex items-center justify-between rounded border p-4">
-                <span className="text-sm">{new Date(r.createdAt).toLocaleDateString()}</span>
-                <span className="text-sm capitalize text-gray-500">{r.status}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+            <ul className="mt-2 space-y-3">
+                {group.receipts.map((r) => (
+                    <li key={r.id} className="flex items-center justify-between rounded border p-4">
+                        <div>
+                            <p className="text-sm">{new Date(r.createdAt).toLocaleDateString()}</p>
+                            <p className="text-sm capitalize text-gray-500">{r.status}</p>
+                        </div>
+                        {r.status === "pending" && (
+                            <ProcessButton receiptId={r.id} />
+                        )}
+                        {r.status === "done" && (
+                            <Link
+                                href={`/groups/${group.id}/receipts/${r.id}`}
+                                className="text-sm text-blue-600 hover:underline"
+                            >
+                                View →
+                            </Link>
+                        )}
+                        </li>
+                    ))}
+                    </ul>
+                )}
+                </section>
     </main>
   );
 }
