@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Receipt, Users, Wallet } from "lucide-react";
+import DemoButton from "@/components/DemoButton";
 
 export default function Home() {
   return (
@@ -33,14 +34,18 @@ export default function Home() {
             Upload a photo of any receipt, tap what you ordered, and Owey splits
             tax and tip proportionally — then sends everyone a Venmo link.
           </p>
-          <div className="mt-8 flex justify-center gap-3">
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg">
               <Link href="/register">Get started free</Link>
             </Button>
-            <Button asChild variant="outline" size="lg">
+            <DemoButton />
+            <Button asChild variant="ghost" size="lg">
               <Link href="/login">Sign in</Link>
             </Button>
           </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Demo has a pre-loaded receipt — no sign-up needed.
+          </p>
         </div>
       </section>
 
