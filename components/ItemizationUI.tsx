@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface User {
   id: string;
@@ -44,6 +44,20 @@ export default function ItemizationUI({ receipt, currentUserId }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
 
+  useEffect(() => {
+    const interval = setInterval(() => router.refresh(), 1500);
+
+    function handleVisible() {
+      if (!document.hidden) router.refresh();
+    }
+    document.addEventListener("visibilitychange", handleVisible);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisible);
+    };
+  }, [router]);
+
   async function toggleClaim(lineItemId: string, claimed: boolean) {
     setLoading(lineItemId);
 
@@ -82,11 +96,11 @@ export default function ItemizationUI({ receipt, currentUserId }: Props) {
     return `venmo://paycharge?txn=pay&amount=${amount.toFixed(2)}&note=${note}`;
   }
 
-
   return (
     <div className="mt-6 space-y-8">
       <section>
         <h2 className="text-sm font-medium text-gray-500">Items</h2>
+        <p className="mt-1 text-xs text-gray-400">Tap the items you ordered.</p>
         <ul className="mt-2 space-y-2">
           {receipt.lineItems.map((item) => {
             const claimed = item.claims.some((c) => c.userId === currentUserId);
@@ -94,19 +108,21 @@ export default function ItemizationUI({ receipt, currentUserId }: Props) {
               <li
                 key={item.id}
                 onClick={() => toggleClaim(item.id, claimed)}
-                className={`flex cursor-pointer items-center justify-between rounded border p-3 transition-colors ${
-                  claimed ? "border-blue-500 bg-blue-50" : "hover:bg-gray-50"
+                className={`flex cursor-pointer items-center justify-between rounded border p-3 transition-colors active:scale-[0.99] ${
+                  claimed
+                    ? "border-blue-500 bg-blue-50"
+                    : "hover:bg-gray-50 active:bg-gray-100"
                 }`}
               >
-                <div>
-                  <p className="text-sm font-medium">{item.name}</p>
-                  <p className="text-xs text-gray-500">
+                <div className="min-w-0 flex-1 pr-3">
+                  <p className="truncate text-sm font-medium">{item.name}</p>
+                  <p className="mt-0.5 text-xs text-gray-500">
                     {item.claims.length > 0
-                      ? `Split by: ${item.claims.map((c) => c.user.name ?? c.user.email).join(", ")}`
+                      ? `Split: ${item.claims.map((c) => c.user.name ?? c.user.email).join(", ")}`
                       : "Unclaimed"}
                   </p>
                 </div>
-                <div className="text-right">
+                <div className="shrink-0 text-right">
                   <p className="text-sm font-medium">${item.price.toFixed(2)}</p>
                   {loading === item.id && (
                     <p className="text-xs text-gray-400">...</p>
@@ -134,11 +150,11 @@ export default function ItemizationUI({ receipt, currentUserId }: Props) {
                   <span className="text-sm font-medium">
                     {m.user.name ?? m.user.email}
                   </span>
-                  <span className="text-sm font-medium">${total.toFixed(2)}</span>
+                  <span className="text-sm font-semibold">${total.toFixed(2)}</span>
                 </div>
                 {subtotal > 0 && (
                   <>
-                    <div className="mt-1 flex gap-3 text-xs text-gray-500">
+                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-500">
                       <span>Food ${subtotal.toFixed(2)}</span>
                       <span>Tax ${tax.toFixed(2)}</span>
                       <span>Tip ${tip.toFixed(2)}</span>
@@ -147,7 +163,7 @@ export default function ItemizationUI({ receipt, currentUserId }: Props) {
                       <div className="mt-2">
                         <a
                           href={venmoLink(total, m.user.name ?? m.user.email)}
-                          className="rounded bg-blue-500 px-3 py-1 text-xs font-medium text-white hover:bg-blue-600"
+                          className="inline-block rounded bg-blue-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-600 active:bg-blue-700"
                         >
                           Pay with Venmo
                         </a>
@@ -169,8 +185,7 @@ export default function ItemizationUI({ receipt, currentUserId }: Props) {
         </ul>
         {(receipt.tax ?? 0) > 0 && (
           <p className="mt-2 text-xs text-gray-500">
-            Tax ${receipt.tax?.toFixed(2)} and tip ${receipt.tip?.toFixed(2)} split
-            proportionally.
+            Tax ${receipt.tax?.toFixed(2)} and tip ${receipt.tip?.toFixed(2)} split proportionally.
           </p>
         )}
       </section>

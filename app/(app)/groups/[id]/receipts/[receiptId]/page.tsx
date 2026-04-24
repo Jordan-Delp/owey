@@ -33,7 +33,7 @@ export default async function ReceiptPage({ params }: Props) {
   if (!isMember) redirect("/dashboard");
 
   return (
-    <main className="mx-auto max-w-2xl p-8">
+    <main className="mx-auto max-w-2xl px-4 py-6 sm:px-8 sm:py-8">
       <Link
         href={`/groups/${groupId}`}
         className="text-sm text-blue-600 hover:underline"

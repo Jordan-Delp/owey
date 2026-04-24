@@ -15,7 +15,7 @@ export default async function DashboardPage() {
   });
 
   return (
-    <main className="mx-auto max-w-2xl p-8">
+    <main className="mx-auto max-w-2xl px-4 py-6 sm:px-8 sm:py-8">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Your Groups</h1>
         <Link
