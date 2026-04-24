@@ -8,13 +8,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <>
-      <header className="border-b bg-white">
+      <header className="bg-blue-600 shadow-sm">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3 sm:px-8">
-          <Link href="/dashboard" className="text-base font-bold tracking-tight">
+          <Link href="/dashboard" className="text-lg font-black text-white tracking-tight">
             Owey
           </Link>
           <div className="flex items-center gap-3">
-            <span className="hidden text-sm text-gray-500 sm:block">
+            <span className="hidden text-sm text-blue-100 sm:block">
               {session?.user?.name ?? session?.user?.email}
             </span>
             <SignOutButton />

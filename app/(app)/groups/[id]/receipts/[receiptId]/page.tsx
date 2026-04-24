@@ -36,19 +36,16 @@ export default async function ReceiptPage({ params }: Props) {
     <main className="mx-auto max-w-2xl px-4 py-6 sm:px-8 sm:py-8">
       <Link
         href={`/groups/${groupId}`}
-        className="text-sm text-blue-600 hover:underline"
+        className="text-sm font-medium text-blue-600 hover:underline"
       >
         ← Back to group
       </Link>
-      <h1 className="mt-4 text-2xl font-bold">Split this receipt</h1>
-      <p className="mt-1 text-sm text-gray-500">
-        Tap the items you ordered.
+      <h1 className="mt-4 text-xl font-bold text-slate-900">Split this receipt</h1>
+      <p className="mt-1 text-sm text-slate-400">
+        Tap the items you ordered. Settlement updates automatically.
       </p>
 
-      <ItemizationUI
-        receipt={receipt}
-        currentUserId={session.user.id}
-      />
+      <ItemizationUI receipt={receipt} currentUserId={session.user.id} />
     </main>
   );
 }

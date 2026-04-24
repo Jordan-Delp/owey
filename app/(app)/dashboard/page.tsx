@@ -17,29 +17,35 @@ export default async function DashboardPage() {
   return (
     <main className="mx-auto max-w-2xl px-4 py-6 sm:px-8 sm:py-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Your Groups</h1>
+        <h1 className="text-xl font-bold text-slate-900">Your Groups</h1>
         <Link
           href="/groups/new"
-          className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          className="rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 active:bg-blue-800"
         >
-          New group
+          + New group
         </Link>
       </div>
 
       {groups.length === 0 ? (
-        <p className="mt-8 text-gray-500">
-          No groups yet. Create one to get started.
-        </p>
+        <div className="mt-12 text-center">
+          <p className="text-slate-400">No groups yet.</p>
+          <p className="mt-1 text-sm text-slate-400">Create one to start splitting bills.</p>
+        </div>
       ) : (
-        <ul className="mt-6 space-y-3">
+        <ul className="mt-4 space-y-3">
           {groups.map((group) => (
             <li key={group.id}>
               <Link
                 href={`/groups/${group.id}`}
-                className="flex items-center justify-between rounded border p-4 hover:bg-gray-50"
+                className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 hover:shadow-md transition-shadow"
               >
-                <span className="font-medium">{group.name}</span>
-                <span className="text-sm text-gray-500">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-base font-bold text-blue-600">
+                    {group.name.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="font-semibold text-slate-800">{group.name}</span>
+                </div>
+                <span className="text-sm text-slate-400">
                   {group._count.receipts}{" "}
                   {group._count.receipts === 1 ? "receipt" : "receipts"}
                 </span>

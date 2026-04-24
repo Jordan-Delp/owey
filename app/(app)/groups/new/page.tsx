@@ -34,43 +34,47 @@ export default function NewGroupPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center">
-      <div className="w-full max-w-sm space-y-6 px-4">
-        <div>
-          <Link href="/dashboard" className="text-sm text-blue-600 hover:underline">
-            ← Back to dashboard
+    <main className="flex min-h-screen flex-col items-center justify-center px-4">
+      <div className="w-full max-w-sm">
+        <div className="mb-8">
+          <Link href="/dashboard" className="text-sm font-medium text-blue-600 hover:underline">
+            ← Dashboard
           </Link>
-          <h1 className="mt-4 text-2xl font-bold">Create a Group</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Invite friends after creating your group.
+          <h1 className="mt-4 text-2xl font-bold text-slate-900">New group</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Add members after creating your group.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium">
-              Group name
-            </label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              required
-              placeholder="e.g. Tokyo Trip, Apartment 4B"
-              className="mt-1 w-full rounded border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+        <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-slate-700">
+                Group name
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                required
+                placeholder="e.g. Tokyo Trip, Apartment 4B"
+                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </div>
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
+            {error && (
+              <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+            )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-          >
-            {loading ? "Creating..." : "Create group"}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-full bg-blue-600 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-50"
+            >
+              {loading ? "Creating..." : "Create group"}
+            </button>
+          </form>
+        </div>
       </div>
     </main>
   );

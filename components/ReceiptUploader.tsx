@@ -41,7 +41,7 @@ export default function ReceiptUploader({ groupId }: Props) {
     });
 
     if (!uploadRes.ok) {
-      setError("Upload to S3 failed");
+      setError("Upload failed");
       setUploading(false);
       return;
     }
@@ -74,7 +74,7 @@ export default function ReceiptUploader({ groupId }: Props) {
       <button
         onClick={() => inputRef.current?.click()}
         disabled={uploading}
-        className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        className="rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-50"
       >
         {uploading ? "Uploading..." : "Upload receipt"}
       </button>
