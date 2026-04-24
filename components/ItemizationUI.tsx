@@ -77,6 +77,12 @@ export default function ItemizationUI({ receipt, currentUserId }: Props) {
     return unclaimedSubtotal + tax + tip;
   }
 
+  function venmoLink(amount: number, name: string) {
+    const note = encodeURIComponent(`Owey: ${name}'s share`);
+    return `venmo://paycharge?txn=pay&amount=${amount.toFixed(2)}&note=${note}`;
+  }
+
+
   return (
     <div className="mt-6 space-y-8">
       <section>
@@ -131,11 +137,23 @@ export default function ItemizationUI({ receipt, currentUserId }: Props) {
                   <span className="text-sm font-medium">${total.toFixed(2)}</span>
                 </div>
                 {subtotal > 0 && (
-                  <div className="mt-1 flex gap-3 text-xs text-gray-500">
-                    <span>Food ${subtotal.toFixed(2)}</span>
-                    <span>Tax ${tax.toFixed(2)}</span>
-                    <span>Tip ${tip.toFixed(2)}</span>
-                  </div>
+                  <>
+                    <div className="mt-1 flex gap-3 text-xs text-gray-500">
+                      <span>Food ${subtotal.toFixed(2)}</span>
+                      <span>Tax ${tax.toFixed(2)}</span>
+                      <span>Tip ${tip.toFixed(2)}</span>
+                    </div>
+                    {m.userId !== currentUserId && (
+                      <div className="mt-2">
+                        <a
+                          href={venmoLink(total, m.user.name ?? m.user.email)}
+                          className="rounded bg-blue-500 px-3 py-1 text-xs font-medium text-white hover:bg-blue-600"
+                        >
+                          Pay with Venmo
+                        </a>
+                      </div>
+                    )}
+                  </>
                 )}
               </li>
             );
