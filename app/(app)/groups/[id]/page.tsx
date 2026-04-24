@@ -6,6 +6,12 @@ import Link from "next/link";
 import ReceiptUploader from "@/components/ReceiptUploader";
 import ProcessButton from "@/components/ProcessButton";
 import AddMemberForm from "@/components/AddMemberForm";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { Receipt, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -32,67 +38,93 @@ export default async function GroupPage({ params }: Props) {
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-6 sm:px-8 sm:py-8">
-      <Link href="/dashboard" className="text-sm font-medium text-blue-600 hover:underline">
+      <Link href="/dashboard" className="text-sm text-primary hover:underline">
         ← Dashboard
       </Link>
 
-      <div className="mt-4 flex items-center justify-between gap-4">
-        <h1 className="text-xl font-bold text-slate-900">{group.name}</h1>
+      <div className="mt-4 flex items-start justify-between gap-4">
+        <h1 className="text-2xl font-bold">{group.name}</h1>
         <ReceiptUploader groupId={group.id} />
       </div>
 
-      <section className="mt-6 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 sm:p-5">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400">Members</h2>
-        <ul className="mt-3 flex flex-wrap gap-2">
-          {group.members.map((m) => (
-            <li
-              key={m.id}
-              className="rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700"
-            >
-              {m.user.name ?? m.user.email}
-            </li>
-          ))}
-        </ul>
-        <AddMemberForm groupId={group.id} />
-      </section>
-
-      <section className="mt-5">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400">Receipts</h2>
-        {group.receipts.length === 0 ? (
-          <div className="mt-3 rounded-2xl bg-white p-6 text-center shadow-sm ring-1 ring-slate-100">
-            <p className="text-sm text-slate-400">No receipts yet. Upload one to get started.</p>
-          </div>
-        ) : (
-          <ul className="mt-3 space-y-3">
-            {group.receipts.map((r) => (
-              <li
-                key={r.id}
-                className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100"
-              >
-                <div>
-                  <p className="text-sm font-semibold text-slate-800">
-                    {new Date(r.createdAt).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </p>
-                  <p className="mt-0.5 text-xs capitalize text-slate-400">{r.status}</p>
+      <div className="mt-6 space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Users className="h-4 w-4" />
+              Members
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              {group.members.map((m) => (
+                <div key={m.id} className="flex items-center gap-1.5 rounded-full border bg-muted/50 pl-1 pr-3 py-1">
+                  <Avatar size="sm">
+                    <AvatarFallback className="text-xs">
+                      {(m.user.name ?? m.user.email).charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm font-medium">{m.user.name ?? m.user.email}</span>
                 </div>
-                {r.status === "pending" && <ProcessButton receiptId={r.id} />}
-                {r.status === "done" && (
-                  <Link
-                    href={`/groups/${group.id}/receipts/${r.id}`}
-                    className="rounded-full bg-blue-50 px-4 py-1.5 text-sm font-semibold text-blue-600 hover:bg-blue-100"
-                  >
-                    View →
-                  </Link>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+              ))}
+            </div>
+            <Separator />
+            <div>
+              <p className="mb-2 text-xs font-medium text-muted-foreground">Add a member by email</p>
+              <AddMemberForm groupId={group.id} />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Receipt className="h-4 w-4" />
+              Receipts
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {group.receipts.length === 0 ? (
+              <div className="py-6 text-center">
+                <p className="text-sm text-muted-foreground">No receipts yet. Upload one to get started.</p>
+              </div>
+            ) : (
+              <ul className="space-y-2">
+                {group.receipts.map((r) => (
+                  <li key={r.id} className="flex items-center justify-between rounded-lg border p-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted">
+                        <Receipt className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">
+                          {new Date(r.createdAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </p>
+                        <Badge
+                          variant={r.status === "done" ? "default" : "secondary"}
+                          className="mt-0.5 h-4 text-[10px]"
+                        >
+                          {r.status}
+                        </Badge>
+                      </div>
+                    </div>
+                    {r.status === "pending" && <ProcessButton receiptId={r.id} />}
+                    {r.status === "done" && (
+                      <Button asChild variant="outline" size="sm">
+                        <Link href={`/groups/${group.id}/receipts/${r.id}`}>View →</Link>
+                      </Button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </main>
   );
 }

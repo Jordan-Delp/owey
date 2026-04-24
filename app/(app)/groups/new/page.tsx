@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function NewGroupPage() {
   const router = useRouter();
@@ -34,47 +38,40 @@ export default function NewGroupPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-4">
+    <main className="flex min-h-[calc(100vh-57px)] flex-col items-center justify-center bg-muted/40 px-4">
       <div className="w-full max-w-sm">
-        <div className="mb-8">
-          <Link href="/dashboard" className="text-sm font-medium text-blue-600 hover:underline">
-            ← Dashboard
-          </Link>
-          <h1 className="mt-4 text-2xl font-bold text-slate-900">New group</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Add members after creating your group.
-          </p>
-        </div>
+        <Card>
+          <CardHeader className="space-y-1 pb-4">
+            <Link href="/dashboard" className="text-xs text-muted-foreground hover:text-primary transition-colors">
+              ← Back to dashboard
+            </Link>
+            <CardTitle className="text-2xl">New group</CardTitle>
+            <CardDescription>Give your group a name to get started. You can add members after.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="name">Group name</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  placeholder="e.g. Tokyo Trip, Apartment 4B"
+                  autoFocus
+                />
+              </div>
 
-        <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-slate-700">
-                Group name
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                placeholder="e.g. Tokyo Trip, Apartment 4B"
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-              />
-            </div>
+              {error && (
+                <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>
+              )}
 
-            {error && (
-              <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-full bg-blue-600 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-50"
-            >
-              {loading ? "Creating..." : "Create group"}
-            </button>
-          </form>
-        </div>
+              <Button type="submit" disabled={loading} className="w-full" size="lg">
+                {loading ? "Creating..." : "Create group"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </main>
   );

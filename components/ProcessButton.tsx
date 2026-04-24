@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Sparkles } from "lucide-react";
 
 interface Props {
   receiptId: string;
@@ -16,9 +18,7 @@ export default function ProcessButton({ receiptId }: Props) {
     setProcessing(true);
     setError(null);
 
-    const res = await fetch(`/api/receipts/${receiptId}/process`, {
-      method: "POST",
-    });
+    const res = await fetch(`/api/receipts/${receiptId}/process`, { method: "POST" });
 
     if (!res.ok) {
       setError("Processing failed");
@@ -31,14 +31,17 @@ export default function ProcessButton({ receiptId }: Props) {
 
   return (
     <div className="text-right">
-      <button
-        onClick={handleProcess}
-        disabled={processing}
-        className="rounded-full bg-blue-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
-      >
-        {processing ? "Processing..." : "Process"}
-      </button>
-      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+      <Button onClick={handleProcess} disabled={processing} size="sm">
+        {processing ? (
+          "Processing..."
+        ) : (
+          <>
+            <Sparkles />
+            Process
+          </>
+        )}
+      </Button>
+      {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
     </div>
   );
 }

@@ -2,6 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { ShoppingCart, Users } from "lucide-react";
 
 interface User {
   id: string;
@@ -60,11 +65,9 @@ export default function ItemizationUI({ receipt, currentUserId }: Props) {
 
   async function toggleClaim(lineItemId: string, claimed: boolean) {
     setLoading(lineItemId);
-
     await fetch(`/api/line-items/${lineItemId}/claim`, {
       method: claimed ? "DELETE" : "POST",
     });
-
     setLoading(null);
     router.refresh();
   }
@@ -86,9 +89,7 @@ export default function ItemizationUI({ receipt, currentUserId }: Props) {
   function unclaimedTotal() {
     if (totalReceiptValue === 0) return 0;
     const proportion = unclaimedSubtotal / totalReceiptValue;
-    const tax = (receipt.tax ?? 0) * proportion;
-    const tip = (receipt.tip ?? 0) * proportion;
-    return unclaimedSubtotal + tax + tip;
+    return unclaimedSubtotal + (receipt.tax ?? 0) * proportion + (receipt.tip ?? 0) * proportion;
   }
 
   function venmoLink(amount: number, name: string) {
@@ -96,98 +97,131 @@ export default function ItemizationUI({ receipt, currentUserId }: Props) {
     return `venmo://paycharge?txn=pay&amount=${amount.toFixed(2)}&note=${note}`;
   }
 
+  function initials(name: string) {
+    return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+  }
+
   return (
-    <div className="mt-6 space-y-8">
-      <section>
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400">Items</h2>
-        <ul className="mt-2 space-y-2">
-          {receipt.lineItems.map((item) => {
-            const claimed = item.claims.some((c) => c.userId === currentUserId);
-            return (
-              <li
-                key={item.id}
-                onClick={() => toggleClaim(item.id, claimed)}
-                className={`flex cursor-pointer items-center justify-between rounded-2xl p-3 transition-all active:scale-[0.99] ${
-                  claimed
-                    ? "bg-blue-50 ring-2 ring-blue-400"
-                    : "bg-white shadow-sm ring-1 ring-slate-100 hover:shadow-md"
-                }`}
-              >
-                <div className="min-w-0 flex-1 pr-3">
-                  <p className="truncate text-sm font-medium">{item.name}</p>
-                  <p className="mt-0.5 text-xs text-gray-500">
-                    {item.claims.length > 0
-                      ? `Split: ${item.claims.map((c) => c.user.name ?? c.user.email).join(", ")}`
-                      : "Unclaimed"}
-                  </p>
-                </div>
-                <div className="shrink-0 text-right">
-                  <p className="text-sm font-medium">${item.price.toFixed(2)}</p>
-                  {loading === item.id && (
-                    <p className="text-xs text-gray-400">...</p>
-                  )}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-
-      <section>
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400">Settlement</h2>
-        <ul className="mt-2 space-y-2">
-          {receipt.group.members.map((m) => {
-            const subtotal = subtotals[m.userId] ?? 0;
-            const proportion = totalReceiptValue === 0 ? 0 : subtotal / totalReceiptValue;
-            const tax = (receipt.tax ?? 0) * proportion;
-            const tip = (receipt.tip ?? 0) * proportion;
-            const total = subtotal + tax + tip;
-
-            return (
-              <li key={m.userId} className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-100">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">
-                    {m.user.name ?? m.user.email}
-                  </span>
-                  <span className="text-sm font-semibold">${total.toFixed(2)}</span>
-                </div>
-                {subtotal > 0 && (
-                  <>
-                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-500">
-                      <span>Food ${subtotal.toFixed(2)}</span>
-                      <span>Tax ${tax.toFixed(2)}</span>
-                      <span>Tip ${tip.toFixed(2)}</span>
+    <div className="mt-6 space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <ShoppingCart className="h-4 w-4" />
+            Items
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">Tap the items you ordered.</p>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-2">
+            {receipt.lineItems.map((item) => {
+              const claimed = item.claims.some((c) => c.userId === currentUserId);
+              return (
+                <li
+                  key={item.id}
+                  onClick={() => toggleClaim(item.id, claimed)}
+                  className={`flex cursor-pointer items-center justify-between rounded-lg border p-3 transition-all select-none active:scale-[0.99] ${
+                    claimed
+                      ? "border-primary bg-primary/5"
+                      : "hover:bg-muted/50"
+                  }`}
+                >
+                  <div className="min-w-0 flex-1 pr-3">
+                    <p className="truncate text-sm font-medium">{item.name}</p>
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {item.claims.length === 0 ? (
+                        <Badge variant="outline" className="h-4 text-[10px]">Unclaimed</Badge>
+                      ) : (
+                        item.claims.map((c) => (
+                          <Badge
+                            key={c.userId}
+                            variant={c.userId === currentUserId ? "default" : "secondary"}
+                            className="h-4 text-[10px]"
+                          >
+                            {c.user.name ?? c.user.email.split("@")[0]}
+                          </Badge>
+                        ))
+                      )}
                     </div>
-                    {m.userId !== currentUserId && (
-                      <div className="mt-2">
-                        <a
-                          href={venmoLink(total, m.user.name ?? m.user.email)}
-                          className="inline-block rounded bg-blue-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-600 active:bg-blue-700"
-                        >
-                          Pay with Venmo
-                        </a>
-                      </div>
-                    )}
-                  </>
-                )}
-              </li>
-            );
-          })}
-          {unclaimedTotal() > 0 && (
-            <li className="flex items-center justify-between rounded-2xl border border-dashed border-slate-200 p-3">
-              <span className="text-sm text-gray-500">Unclaimed</span>
-              <span className="text-sm font-medium text-gray-500">
-                ${unclaimedTotal().toFixed(2)}
-              </span>
-            </li>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p className="text-sm font-semibold">${item.price.toFixed(2)}</p>
+                    {loading === item.id && <p className="text-xs text-muted-foreground">...</p>}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Users className="h-4 w-4" />
+            Settlement
+          </CardTitle>
+          {(receipt.tax ?? 0) > 0 && (
+            <p className="text-xs text-muted-foreground">
+              Tax ${receipt.tax?.toFixed(2)} and tip ${receipt.tip?.toFixed(2)} split proportionally.
+            </p>
           )}
-        </ul>
-        {(receipt.tax ?? 0) > 0 && (
-          <p className="mt-2 text-xs text-gray-500">
-            Tax ${receipt.tax?.toFixed(2)} and tip ${receipt.tip?.toFixed(2)} split proportionally.
-          </p>
-        )}
-      </section>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-3">
+            {receipt.group.members.map((m, i) => {
+              const subtotal = subtotals[m.userId] ?? 0;
+              const proportion = totalReceiptValue === 0 ? 0 : subtotal / totalReceiptValue;
+              const tax = (receipt.tax ?? 0) * proportion;
+              const tip = (receipt.tip ?? 0) * proportion;
+              const total = subtotal + tax + tip;
+              const displayName = m.user.name ?? m.user.email;
+
+              return (
+                <li key={m.userId}>
+                  {i > 0 && <Separator className="mb-3" />}
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      <AvatarFallback className={`text-sm font-semibold ${m.userId === currentUserId ? "bg-primary text-primary-foreground" : ""}`}>
+                        {initials(displayName)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold truncate">{displayName}</p>
+                      {subtotal > 0 && (
+                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+                          <span>Food ${subtotal.toFixed(2)}</span>
+                          <span>Tax ${tax.toFixed(2)}</span>
+                          <span>Tip ${tip.toFixed(2)}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <p className="text-base font-bold">${total.toFixed(2)}</p>
+                      {m.userId !== currentUserId && subtotal > 0 && (
+                        <a
+                          href={venmoLink(total, displayName)}
+                          className="mt-1 inline-block rounded-md bg-[#3D95CE] px-2.5 py-1 text-xs font-semibold text-white hover:bg-[#3585b8]"
+                        >
+                          Pay Venmo
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+            {unclaimedTotal() > 0 && (
+              <>
+                <Separator />
+                <li className="flex items-center justify-between py-1">
+                  <span className="text-sm text-muted-foreground">Unclaimed</span>
+                  <span className="text-sm font-semibold text-muted-foreground">${unclaimedTotal().toFixed(2)}</span>
+                </li>
+              </>
+            )}
+          </ul>
+        </CardContent>
+      </Card>
     </div>
   );
 }

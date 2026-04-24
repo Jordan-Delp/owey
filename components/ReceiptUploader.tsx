@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Upload } from "lucide-react";
 
 interface Props {
   groupId: string;
@@ -64,21 +66,18 @@ export default function ReceiptUploader({ groupId }: Props) {
 
   return (
     <div>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFile}
-      />
-      <button
-        onClick={() => inputRef.current?.click()}
-        disabled={uploading}
-        className="rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-50"
-      >
-        {uploading ? "Uploading..." : "Upload receipt"}
-      </button>
-      {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
+      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      <Button onClick={() => inputRef.current?.click()} disabled={uploading}>
+        {uploading ? (
+          "Uploading..."
+        ) : (
+          <>
+            <Upload />
+            Upload receipt
+          </>
+        )}
+      </Button>
+      {error && <p className="mt-2 text-xs text-destructive">{error}</p>}
     </div>
   );
 }

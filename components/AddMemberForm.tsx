@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function AddMemberForm({ groupId }: { groupId: string }) {
   const router = useRouter();
@@ -25,7 +27,7 @@ export default function AddMemberForm({ groupId }: { groupId: string }) {
     if (!res.ok) {
       setMessage({ text: data.message ?? "Something went wrong", type: "error" });
     } else {
-      setMessage({ text: `${data.name ?? email} added to the group.`, type: "success" });
+      setMessage({ text: `${data.name ?? email} added.`, type: "success" });
       setEmail("");
       router.refresh();
     }
@@ -34,26 +36,22 @@ export default function AddMemberForm({ groupId }: { groupId: string }) {
   }
 
   return (
-    <div className="mt-3">
+    <div>
       <form onSubmit={handleSubmit} className="flex gap-2">
-        <input
+        <Input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="friend@email.com"
           required
-          className="flex-1 rounded border px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1"
         />
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded bg-black px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
-        >
+        <Button type="submit" disabled={loading} size="sm">
           {loading ? "Adding..." : "Add"}
-        </button>
+        </Button>
       </form>
       {message && (
-        <p className={`mt-1.5 text-sm ${message.type === "error" ? "text-red-500" : "text-green-600"}`}>
+        <p className={`mt-1.5 text-xs ${message.type === "error" ? "text-destructive" : "text-green-600"}`}>
           {message.text}
         </p>
       )}
