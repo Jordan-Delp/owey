@@ -49,6 +49,26 @@ export default function ItemizationUI({ receipt, currentUserId }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
 
+  // Track current user's claims locally for instant UI feedback
+  const [myClaims, setMyClaims] = useState<Set<string>>(
+    () => new Set(
+      receipt.lineItems
+        .filter((item) => item.claims.some((c) => c.userId === currentUserId))
+        .map((item) => item.id)
+    )
+  );
+
+  // Sync myClaims when server data arrives (from polling)
+  useEffect(() => {
+    setMyClaims(
+      new Set(
+        receipt.lineItems
+          .filter((item) => item.claims.some((c) => c.userId === currentUserId))
+          .map((item) => item.id)
+      )
+    );
+  }, [receipt, currentUserId]);
+
   useEffect(() => {
     const interval = setInterval(() => router.refresh(), 1500);
 
@@ -64,6 +84,13 @@ export default function ItemizationUI({ receipt, currentUserId }: Props) {
   }, [router]);
 
   async function toggleClaim(lineItemId: string, claimed: boolean) {
+    setMyClaims((prev) => {
+      const next = new Set(prev);
+      if (claimed) next.delete(lineItemId);
+      else next.add(lineItemId);
+      return next;
+    });
+
     setLoading(lineItemId);
     await fetch(`/api/line-items/${lineItemId}/claim`, {
       method: claimed ? "DELETE" : "POST",
@@ -114,7 +141,7 @@ export default function ItemizationUI({ receipt, currentUserId }: Props) {
         <CardContent>
           <ul className="space-y-2">
             {receipt.lineItems.map((item) => {
-              const claimed = item.claims.some((c) => c.userId === currentUserId);
+              const claimed = myClaims.has(item.id);
               return (
                 <li
                   key={item.id}
