@@ -17,6 +17,10 @@ model User {
   createdAt     DateTime  @default(now())
   accounts      Account[]
   sessions      Session[]
+  ownedGroups   Group[]
+  groupMembers  GroupMember[]
+  receipts      Receipt[]
+  claims        Claim[]
 }
 
 model Account {
@@ -51,4 +55,58 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Group {
+  id        String        @id @default(cuid())
+  name      String
+  ownerId   String
+  createdAt DateTime      @default(now())
+  owner     User          @relation(fields: [ownerId], references: [id])
+  members   GroupMember[]
+  receipts  Receipt[]
+}
+
+model GroupMember {
+  id       String @id @default(cuid())
+  groupId  String
+  userId   String
+  group    Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+}
+
+model Receipt {
+  id        String      @id @default(cuid())
+  groupId   String
+  uploadedBy String
+  imageKey  String
+  total     Float?
+  tax       Float?
+  tip       Float?
+  status    String      @default("pending")
+  createdAt DateTime    @default(now())
+  group     Group       @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  uploader  User        @relation(fields: [uploadedBy], references: [id])
+  lineItems LineItem[]
+}
+
+model LineItem {
+  id        String   @id @default(cuid())
+  receiptId String
+  name      String
+  price     Float
+  receipt   Receipt  @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  claims    Claim[]
+}
+
+model Claim {
+  id         String   @id @default(cuid())
+  lineItemId String
+  userId     String
+  lineItem   LineItem @relation(fields: [lineItemId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([lineItemId, userId])
 }
