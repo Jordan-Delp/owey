@@ -57,4 +57,33 @@ describe("calculateSettlement", () => {
     expect(result["alice"].total).toBeCloseTo(115);
   });
 
+  it("handles three-way split evenly", () => {
+    const result = calculateSettlement(
+      [{ id: "1", price: 30, claims: [{ userId: "a" }, { userId: "b" }, { userId: "c" }] }],
+      0,
+      0
+    );
+    expect(result["a"].subtotal).toBeCloseTo(10);
+    expect(result["b"].subtotal).toBeCloseTo(10);
+    expect(result["c"].subtotal).toBeCloseTo(10);
+  });
+
+  it("handles realistic mixed scenario with unequal shares", () => {
+    const result = calculateSettlement(
+      [
+        { id: "1", price: 40, claims: [{ userId: "alice" }] },
+        { id: "2", price: 20, claims: [{ userId: "bob" }] },
+        { id: "3", price: 30, claims: [{ userId: "alice" }, { userId: "bob" }] },
+      ],
+      9,   // tax
+      6    // tip
+    );
+    // alice: $40 + $15 = $55, bob: $20 + $15 = $35, total food = $90
+    // alice proportion = 55/90, bob proportion = 35/90
+    expect(result["alice"].subtotal).toBeCloseTo(55);
+    expect(result["bob"].subtotal).toBeCloseTo(35);
+    expect(result["alice"].tax).toBeCloseTo(9 * 55 / 90);
+    expect(result["bob"].tax).toBeCloseTo(9 * 35 / 90);
+  });
+
 });
