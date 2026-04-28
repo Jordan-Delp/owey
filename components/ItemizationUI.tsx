@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { ShoppingCart, Users } from "lucide-react";
+import { calculateSettlement } from "@/lib/settlement";
 
 interface User {
   id: string;
@@ -99,14 +100,11 @@ export default function ItemizationUI({ receipt, currentUserId }: Props) {
     router.refresh();
   }
 
-  const subtotals: Record<string, number> = {};
-  for (const item of receipt.lineItems) {
-    if (item.claims.length === 0) continue;
-    const share = item.price / item.claims.length;
-    for (const claim of item.claims) {
-      subtotals[claim.userId] = (subtotals[claim.userId] ?? 0) + share;
-    }
-  }
+  const settlement = calculateSettlement(
+  receipt.lineItems,
+  receipt.tax ?? 0,
+  receipt.tip ?? 0
+  );
 
   const totalReceiptValue = receipt.lineItems.reduce((sum, item) => sum + item.price, 0);
   const unclaimedSubtotal = receipt.lineItems
@@ -196,11 +194,11 @@ export default function ItemizationUI({ receipt, currentUserId }: Props) {
         <CardContent>
           <ul className="space-y-3">
             {receipt.group.members.map((m, i) => {
-              const subtotal = subtotals[m.userId] ?? 0;
-              const proportion = totalReceiptValue === 0 ? 0 : subtotal / totalReceiptValue;
-              const tax = (receipt.tax ?? 0) * proportion;
-              const tip = (receipt.tip ?? 0) * proportion;
-              const total = subtotal + tax + tip;
+              const userTotals = settlement[m.userId];
+              const subtotal = userTotals?.subtotal ?? 0;
+              const tax = userTotals?.tax ?? 0;
+              const tip = userTotals?.tip ?? 0;
+              const total = userTotals?.total ?? 0;
               const displayName = m.user.name ?? m.user.email;
 
               return (

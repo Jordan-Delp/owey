@@ -26,6 +26,21 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
 
+      - name: Type check
+        run: npm run typecheck
+        env:
+          DATABASE_URL: postgresql://user:pass@localhost:5432/owey
+          NEXTAUTH_SECRET: ci-secret
+          NEXTAUTH_URL: http://localhost:3000
+          AWS_ACCESS_KEY_ID: dummy
+          AWS_SECRET_ACCESS_KEY: dummy
+          AWS_REGION: us-east-2
+          S3_BUCKET_RECEIPTS: dummy
+          ANTHROPIC_API_KEY: dummy
+
+      - name: Test
+        run: npm test
+
       - name: Build
         run: npm run build
         env:
@@ -34,6 +49,6 @@ jobs:
           NEXTAUTH_URL: http://localhost:3000
           AWS_ACCESS_KEY_ID: dummy
           AWS_SECRET_ACCESS_KEY: dummy
-          AWS_REGION: us-east-1
+          AWS_REGION: us-east-2
           S3_BUCKET_RECEIPTS: dummy
           ANTHROPIC_API_KEY: dummy
