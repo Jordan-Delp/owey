@@ -44,9 +44,11 @@ interface Receipt {
 interface Props {
   receipt: Receipt;
   currentUserId: string;
+  ownerId: string;
+  ownerVenmoHandle?: string | null;
 }
 
-export default function ItemizationUI({ receipt, currentUserId }: Props) {
+export default function ItemizationUI({ receipt, currentUserId, ownerId, ownerVenmoHandle }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
 
@@ -117,9 +119,12 @@ export default function ItemizationUI({ receipt, currentUserId }: Props) {
     return unclaimedSubtotal + (receipt.tax ?? 0) * proportion + (receipt.tip ?? 0) * proportion;
   }
 
-  function venmoLink(amount: number, name: string) {
-    const note = encodeURIComponent(`Owey: ${name}'s share`);
-    return `venmo://paycharge?txn=pay&amount=${amount.toFixed(2)}&note=${note}`;
+  function venmoLink(amount: number, note: string) {
+    const encodedNote = encodeURIComponent(`Owey: ${note}`);
+    if (ownerVenmoHandle) {
+      return `venmo://paycharge?txn=pay&recipients=${ownerVenmoHandle}&amount=${amount.toFixed(2)}&note=${encodedNote}`;
+    }
+    return `venmo://paycharge?txn=pay&amount=${amount.toFixed(2)}&note=${encodedNote}`;
   }
 
   function initials(name: string) {
@@ -193,54 +198,71 @@ export default function ItemizationUI({ receipt, currentUserId }: Props) {
         </CardHeader>
         <CardContent>
           <ul className="space-y-3">
-            {receipt.group.members.map((m, i) => {
+            {(() => {
+              const ownerMember = receipt.group.members.find((m) => m.userId === ownerId);
+              const ownerName = ownerMember?.user.name ?? ownerMember?.user.email.split("@")[0] ?? "host";
+              return receipt.group.members.map((m, i) => {
               const userTotals = settlement[m.userId];
               const subtotal = userTotals?.subtotal ?? 0;
               const tax = userTotals?.tax ?? 0;
               const tip = userTotals?.tip ?? 0;
-              const total = userTotals?.total ?? 0;
+              const isOwner = m.userId === ownerId;
+              const isCurrentUser = m.userId === currentUserId;
+              const total = isOwner
+                ? (userTotals?.total ?? 0) + unclaimedTotal()
+                : (userTotals?.total ?? 0);
               const displayName = m.user.name ?? m.user.email;
+              const showVenmo = isCurrentUser && !isOwner && total > 0;
 
               return (
                 <li key={m.userId}>
                   {i > 0 && <Separator className="mb-3" />}
                   <div className="flex items-center gap-3">
                     <Avatar>
-                      <AvatarFallback className={`text-sm font-semibold ${m.userId === currentUserId ? "bg-primary text-primary-foreground" : ""}`}>
+                      <AvatarFallback className={`text-sm font-semibold ${isCurrentUser ? "bg-primary text-primary-foreground" : ""}`}>
                         {initials(displayName)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate">{displayName}</p>
-                      {subtotal > 0 && (
+                      <p className="text-sm font-semibold truncate">
+                        {displayName}
+                        {isOwner && <span className="ml-1.5 text-xs font-normal text-muted-foreground">(host)</span>}
+                      </p>
+                      {(subtotal > 0 || (isOwner && unclaimedTotal() > 0)) && (
                         <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-                          <span>Food ${subtotal.toFixed(2)}</span>
-                          <span>Tax ${tax.toFixed(2)}</span>
-                          <span>Tip ${tip.toFixed(2)}</span>
+                          {subtotal > 0 && <span>Food ${subtotal.toFixed(2)}</span>}
+                          {tax > 0 && <span>Tax ${tax.toFixed(2)}</span>}
+                          {tip > 0 && <span>Tip ${tip.toFixed(2)}</span>}
+                          {isOwner && unclaimedTotal() > 0 && (
+                            <span>Unclaimed ${unclaimedTotal().toFixed(2)}</span>
+                          )}
                         </div>
                       )}
                     </div>
                     <div className="shrink-0 text-right">
                       <p className="text-base font-bold">${total.toFixed(2)}</p>
-                      {m.userId !== currentUserId && subtotal > 0 && (
+                      {showVenmo && (
                         <a
                           href={venmoLink(total, displayName)}
                           className="mt-1 inline-block rounded-md bg-[#3D95CE] px-2.5 py-1 text-xs font-semibold text-white hover:bg-[#3585b8]"
                         >
-                          Pay Venmo
+                          Pay {ownerName}
                         </a>
                       )}
                     </div>
                   </div>
                 </li>
               );
-            })}
-            {unclaimedTotal() > 0 && (
+              });
+            })()}
+            {false && (
               <>
                 <Separator />
                 <li className="flex items-center justify-between py-1">
                   <span className="text-sm text-muted-foreground">Unclaimed</span>
-                  <span className="text-sm font-semibold text-muted-foreground">${unclaimedTotal().toFixed(2)}</span>
+                  <span className="text-sm font-semibold text-muted-foreground">
+                    ${unclaimedTotal().toFixed(2)}
+                  </span>
                 </li>
               </>
             )}

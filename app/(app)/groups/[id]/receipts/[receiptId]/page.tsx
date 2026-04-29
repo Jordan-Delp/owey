@@ -42,7 +42,12 @@ export default async function ReceiptPage({ params }: Props) {
         Tap the items you ordered. Settlement updates automatically.
       </p>
 
-      <ItemizationUI receipt={receipt} currentUserId={session.user.id} />
+      <ItemizationUI
+        receipt={receipt}
+        currentUserId={session.user.id}
+        ownerId={receipt.group.ownerId}
+        ownerVenmoHandle={receipt.group.venmoHandle}
+      />
     </main>
   );
 }
