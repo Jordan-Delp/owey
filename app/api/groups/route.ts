@@ -25,12 +25,13 @@ export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
-  const { name } = await req.json();
+  const { name, venmoHandle } = await req.json();
   if (!name) return NextResponse.json({ message: "Name is required" }, { status: 400 });
 
   const group = await prisma.group.create({
     data: {
       name,
+      venmoHandle: venmoHandle || null,
       ownerId: session.user.id,
       members: {
         create: { userId: session.user.id },

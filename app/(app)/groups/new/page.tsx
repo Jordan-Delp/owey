@@ -20,11 +20,13 @@ export default function NewGroupPage() {
 
     const form = e.currentTarget;
     const name = (form.elements.namedItem("name") as HTMLInputElement).value;
+    const venmoHandle = (form.elements.namedItem("venmoHandle") as HTMLInputElement).value || undefined;
+
 
     const res = await fetch("/api/groups", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ name, venmoHandle }),
     });
 
     if (!res.ok) {
@@ -60,6 +62,16 @@ export default function NewGroupPage() {
                   placeholder="e.g. Tokyo Trip, Apartment 4B"
                   autoFocus
                 />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="venmoHandle">
+                  Your Venmo username <span className="text-muted-foreground font-normal">(optional)</span>
+                </Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">@</span>
+                  <Input id="venmoHandle" name="venmoHandle" type="text" placeholder="your-venmo" className="pl-7" />
+                </div>
+                <p className="text-xs text-muted-foreground">Members will use this to pay you back.</p>
               </div>
 
               {error && (

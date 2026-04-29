@@ -22,11 +22,12 @@ export default function RegisterPage() {
     const name = (form.elements.namedItem("name") as HTMLInputElement).value;
     const email = (form.elements.namedItem("email") as HTMLInputElement).value;
     const password = (form.elements.namedItem("password") as HTMLInputElement).value;
+    const venmoHandle = (form.elements.namedItem("venmoHandle") as HTMLInputElement).value || undefined;
 
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, password, venmoHandle }),
     });
 
     if (!res.ok) {
@@ -73,6 +74,16 @@ export default function RegisterPage() {
               <div className="space-y-1.5">
                 <Label htmlFor="password">Password</Label>
                 <Input id="password" name="password" type="password" required placeholder="••••••••" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="venmoHandle">
+                  Venmo username <span className="text-muted-foreground font-normal">(optional)</span>
+                </Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">@</span>
+                  <Input id="venmoHandle" name="venmoHandle" type="text" placeholder="your-venmo" className="pl-7" />
+                </div>
+                <p className="text-xs text-muted-foreground">Used to generate payment links when you split a bill.</p>
               </div>
 
               {error && (
