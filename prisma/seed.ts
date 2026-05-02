@@ -7,12 +7,13 @@ async function main() {
   // Create demo owner (Alex — paid the bill)
   const ownerPassword = await bcrypt.hash("owey-demo-owner", 12);
   const owner = await prisma.user.upsert({
-    where: { email: "alex@owey-demo.app" },
+    where: { email: "jordan@owey-demo.app" },
     update: {},
     create: {
-      name: "Alex",
-      email: "alex@owey-demo.app",
+      name: "Jordan",
+      email: "jordan@owey-demo.app",
       password: ownerPassword,
+      venmoHandle: "jordan-delp-1",
     },
   });
 

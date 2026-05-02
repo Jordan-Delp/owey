@@ -28,13 +28,17 @@ await prisma.user.deleteMany({
   },
 });
 
-  const owner = await prisma.user.findUnique({
+  const ownerPassword = await bcrypt.hash("owey-demo-owner", 12);
+  const owner = await prisma.user.upsert({
     where: { email: "alex@owey-demo.app" },
+    update: {},
+    create: {
+      name: "Jordan",
+      email: "alex@owey-demo.app",
+      password: ownerPassword,
+      venmoHandle: "jordan-delp-1",
+    },
   });
-
-  if (!owner) {
-    return NextResponse.json({ error: "Demo not configured" }, { status: 500 });
-  }
 
   const uid = randomBytes(4).toString("hex");
   const email = `demo-${uid}-visitor@owey-demo.app`;
@@ -49,6 +53,7 @@ await prisma.user.deleteMany({
     data: {
       name: "Friday Night Dinner",
       ownerId: owner.id,
+      venmoHandle: "jordan-delp-1",
       members: {
         create: [{ userId: owner.id }, { userId: visitor.id }],
       },

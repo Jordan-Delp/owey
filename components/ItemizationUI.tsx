@@ -122,9 +122,9 @@ export default function ItemizationUI({ receipt, currentUserId, ownerId, ownerVe
   function venmoLink(amount: number, note: string) {
     const encodedNote = encodeURIComponent(`Owey: ${note}`);
     if (ownerVenmoHandle) {
-      return `venmo://paycharge?txn=pay&recipients=${ownerVenmoHandle}&amount=${amount.toFixed(2)}&note=${encodedNote}`;
+      return `https://account.venmo.com/payment-link?txn=pay&recipients=${ownerVenmoHandle}&amount=${amount.toFixed(2)}&note=${encodedNote}`;
     }
-    return `venmo://paycharge?txn=pay&amount=${amount.toFixed(2)}&note=${encodedNote}`;
+    return `https://account.venmo.com/payment-link?txn=pay&amount=${amount.toFixed(2)}&note=${encodedNote}`;
   }
 
   function initials(name: string) {
@@ -244,6 +244,8 @@ export default function ItemizationUI({ receipt, currentUserId, ownerId, ownerVe
                       {showVenmo && (
                         <a
                           href={venmoLink(total, displayName)}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="mt-1 inline-block rounded-md bg-[#3D95CE] px-2.5 py-1 text-xs font-semibold text-white hover:bg-[#3585b8]"
                         >
                           Pay {ownerName}
