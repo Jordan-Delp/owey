@@ -70,7 +70,7 @@ const imageUrl = await getSignedUrl(
                 "tax": number,
                 "tip": number
             }
-            If tax or tip are not present, use 0.`,
+            If an item has modifiers or add-ons (e.g. "Add Sprite", "Add Pepperoni"), merge them into the parent item: combine the names and add the prices together.If tax or tip are not present, use 0.`,
           },
         ],
       },
