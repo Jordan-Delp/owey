@@ -29,6 +29,16 @@ export default async function ReceiptPage({ params }: Props) {
 
   if (!receipt) notFound();
 
+  const serializedReceipt = {
+  ...receipt,
+  tax: receipt.tax ? Number(receipt.tax) : null,
+  tip: receipt.tip ? Number(receipt.tip) : null,
+  lineItems: receipt.lineItems.map((item) => ({
+    ...item,
+    price: Number(item.price),
+  })),
+};
+
   const isMember = receipt.group.members.some((m) => m.userId === session.user.id);
   if (!isMember) redirect("/dashboard");
 
@@ -43,7 +53,7 @@ export default async function ReceiptPage({ params }: Props) {
       </p>
 
       <ItemizationUI
-        receipt={receipt}
+        receipt={serializedReceipt}
         currentUserId={session.user.id}
         ownerId={receipt.group.ownerId}
         ownerVenmoHandle={receipt.group.venmoHandle}

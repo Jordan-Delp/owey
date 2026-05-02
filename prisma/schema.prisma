@@ -80,17 +80,17 @@ model GroupMember {
 }
 
 model Receipt {
-  id        String      @id @default(cuid())
+  id        String       @id @default(cuid())
   groupId   String
   uploadedBy String
   imageKey  String
   total     Float?
-  tax       Float?
-  tip       Float?
-  status    String      @default("pending")
-  createdAt DateTime    @default(now())
-  group     Group       @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  uploader  User        @relation(fields: [uploadedBy], references: [id])
+  tax       Decimal? @db.Decimal(10, 2)
+  tip       Decimal? @db.Decimal(10, 2)
+  status    String       @default("pending")
+  createdAt DateTime     @default(now())
+  group     Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  uploader  User         @relation(fields: [uploadedBy], references: [id])
   lineItems LineItem[]
 }
 
@@ -98,7 +98,7 @@ model LineItem {
   id        String   @id @default(cuid())
   receiptId String
   name      String
-  price     Float
+  price     Decimal? @db.Decimal(10, 2)
   receipt   Receipt  @relation(fields: [receiptId], references: [id], onDelete: Cascade)
   claims    Claim[]
 }
