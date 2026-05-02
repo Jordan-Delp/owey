@@ -9,16 +9,20 @@ export default function DemoButton() {
 
   async function handleDemo() {
     setLoading(true);
+    
+    const res = await fetch("/api/demo", { method: "POST" });
+    const { email, password } = await res.json();
+
     await signIn("credentials", {
-      email: "demo@owey.app",
-      password: "demo1234",
+      email,
+      password,
       callbackUrl: "/dashboard",
     });
   }
 
   return (
     <Button variant="outline" size="lg" onClick={handleDemo} disabled={loading}>
-      {loading ? "Loading..." : "Try demo"}
+      {loading ? "Setting up demo..." : "Try demo"}
     </Button>
   );
 }
