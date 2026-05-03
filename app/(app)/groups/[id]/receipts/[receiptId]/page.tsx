@@ -24,6 +24,7 @@ export default async function ReceiptPage({ params }: Props) {
       group: {
         include: { members: { include: { user: true } } },
       },
+      uploader: true,
     },
   });
 
@@ -55,8 +56,8 @@ export default async function ReceiptPage({ params }: Props) {
       <ItemizationUI
         receipt={serializedReceipt}
         currentUserId={session.user.id}
-        ownerId={receipt.group.ownerId}
-        ownerVenmoHandle={receipt.group.venmoHandle}
+        ownerId={receipt.uploadedBy}
+        ownerVenmoHandle={receipt.uploader?.venmoHandle ?? null}
       />
     </main>
   );
